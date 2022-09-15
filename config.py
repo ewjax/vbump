@@ -9,9 +9,12 @@ ini_filename = 'versionbump.ini'
 config_data = configparser.ConfigParser()
 
 
-def load() -> None:
+def load(quiet: bool) -> None:
     """
     Utility function to load contents from .ini logfile into a configparser.ConfigParser object
+
+    Args:
+        quiet:
     """
     global config_data
 
@@ -20,14 +23,15 @@ def load() -> None:
         if len(file_list) == 0:
             raise ValueError(f'Unable to open ini logfile [{ini_filename}]')
     except ValueError as verr:
-        starprint(f'{str(verr)}, creating default {ini_filename}')
+        if not quiet:
+            print(f'{str(verr)}, creating default {ini_filename}')
 
     # confirm all needed sections and key values are present in the ini logfile
     # fixme - uncomment this after verify_settings() is ready
     # verify_settings()
 
     # print out the contents
-    show()
+    # show()
 
 
 def verify_settings() -> None:

@@ -1,77 +1,43 @@
 import re
 import copy
-
+import argparse
 
 import config
 
 
-def try_parse(ver):
-    parse_dict = parse(ver)
-    print(ver)
-    print(parse_dict)
-
-
-def parse(ver):
-
-    current_version_dict = config.config_data['current_version']
-
-    # make a manual copy, since although the config.config representation as a dictionary works,
-    # you can't print and debug with it
-    new_version_dict = {}
-    for key in current_version_dict.keys():
-        new_version_dict[key] = current_version_dict[key]
-
-    regex = config.config_data['syntax']['read_regex']
-    pre ='(?P<pre>.*)'
-    post ='(?P<post>.*)'
-    full_regex = pre + regex + post
-
-    # get the list of fields from the keys present in the [current_version] section of the ini
-    field_list = new_version_dict.keys()
-
-    m = re.match(full_regex, ver)
-    if m:
-        pre = m.group('pre')
-        new_version_dict['pre'] = pre
-
-        for fieldname in field_list:
-
-            # extract each value from the regex search
-            # fieldnames present in [current_version] section of the ini, but not present in the regex,
-            # will cause an exception to be thrown, which we will catch and ignore
-            try:
-                val = m.group(fieldname)
-                new_version_dict[fieldname] = val
-            except:
-                pass
-
-        post = m.group('post')
-        new_version_dict['post'] = post
-
-    # note that the returned dictionary will actually include two extra sections in it, 'pre' and 'post',
-    # which include the contents of any line leading up to, and following, the version string
-    return new_version_dict
-
-
+#
+#
 def increment(value: str) -> str:
+    """
+    Perform increment operation on string representation of a value, such as what would be obtained from an ini file
+
+    Args:
+        value: value to be incremented, e.g. '3' becomes '4'
+
+    Returns:
+        string representation of incremented value
+
+    """
     rv = None
     if value.isdecimal():
         rv = f'{int(value) + 1}'
     return rv
 
 
-def try_bump(token):
-    print(f'bumping {token}')
-    new_version_dict = bump(token)
+#
+#
+def bump(fieldname: str = None) -> dict:
+    """
+    Bump operation, to increase indicated fieldname by 1, and reset all lower fields (as indicated in reset_order) to 0
+        - 'auto' fields are also incremented by 1
 
-    current_version_dict = config.config_data['current_version']
+    Args:
+        fieldname: fieldname to be incremented, or 'None' to only increment 'auto' fields
 
-    for key in new_version_dict:
-        print(f'{key}, current = {current_version_dict[key]}, new = {new_version_dict[key]}')
+    Returns:
+        updated dictionary of version fields and values
 
-
-def bump(token):
-
+    """
     reset_order = config.config_data['bump']['reset_order']
     reset_list = reset_order.split(', ')
 
@@ -91,33 +57,50 @@ def bump(token):
         reset_dict[field] = i
         i += 1
 
-    # start by bumping the requested field
-    if token in new_version_dict:
-        cur_value = new_version_dict[token]
+    # start by incrementing all fields in bump.auto list
+    auto_list = config.config_data['bump']['auto'].split(', ')
+    for field in auto_list:
+        if field in new_version_dict:
+            cur_value = new_version_dict[field]
+            new_value = increment(cur_value)
+            if new_value:
+                new_version_dict[field] = new_value
+
+    # then bumping the requested field
+    # note that if the requested field has already been bumped in the auto_list, don't bump it again
+    if fieldname in new_version_dict and fieldname not in auto_list:
+        cur_value = new_version_dict[fieldname]
         new_value = increment(cur_value)
         if new_value:
-            new_version_dict[token] = new_value
+            new_version_dict[fieldname] = new_value
 
             # if we successfully bumped the requested field, now reset all downstream fields, as defined in
             # the [bump][reset_order] value of the ini file
-            if token in reset_dict:
+            if fieldname in reset_dict:
                 for key in reset_dict.keys():
                     # use the reset_dict dictionary we created earlier to determine if each field should be reset
-                    if reset_dict[key] > reset_dict[token]:
+                    if reset_dict[key] > reset_dict[fieldname]:
                         new_version_dict[key] = '0'
 
     return new_version_dict
 
 
+#
+#
+def version(write_pattern: str) -> str:
+    """
+    create version string, using the f-string pattern in write_pattern, and the [current_version] field values
 
+    note that a target present in the write_pattern, but not in the list of fields in the [current_version] section of the ini,
+    will cause an exception which we don't catch, because there is no graceful recovery
 
+    Args:
+        write_pattern: f-string format for the created string
 
+    Returns:
+        string containing current version, in write_pattern format
 
-def version(write_pattern):
-
-    # note that a target present in the write_pattern, but not in the list of fields in the [current_version] section of the ini,
-    # will cause an exception which we don't catch, because there is no graceful recovery
-    # todo - can we pre-scan the write pattern and identify all fields, and ensure we have a value for each?
+    """
 
     # it is a bit amazing that this works.  Handy that format() is written to properly deal with **kwargs, which as it happens,
     # the dictionary representation of the config.config objects are in exactly the right format to support
@@ -127,78 +110,45 @@ def version(write_pattern):
 
 def main():
 
-    config.load()
+    # parse the command line
+    cli_parser = argparse.ArgumentParser()
 
+    # bump commands
+    cli_parser.add_argument('-b', '--bump',
+                            help='bump the indicated field [default = auto field(s)]',
+                            nargs='?', type=str)
 
-    ver = '3.4.5.99.rc.7'
-    try_parse(ver)
+    # report current version
+    cli_parser.add_argument('-v', '--version',
+                            help='report current version string from .ini file to stdout [default format = dev]',
+                            nargs='?', type=str, const='dev', default='dev', choices=['dev', 'prod'])
 
-    ver = '3.4.5.99.rc-7'
-    try_parse(ver)
+    # write current version to output files
+    cli_parser.add_argument('-w', '--write',
+                            help='write current version string to output files [default format = dev]',
+                            nargs='?', type=str, const='dev', default='dev', choices=['dev', 'prod'])
 
-    ver = '3.4.5.99-dev.7'
-    try_parse(ver)
+    # dry run?
+    cli_parser.add_argument('-d', '--dryrun',
+                            help='flag: report what actions will be taken, but do not actually take them',
+                            action='store_true')
 
-    ver = '3.4.5.99_dev7'
-    try_parse(ver)
+    # quiet
+    cli_parser.add_argument('-q', '--quiet',
+                            help='flag: perform all actions with no screen reports',
+                            action='store_true')
 
-    ver = '3.4.5.99@dev_7'
-    try_parse(ver)
+    # init
+    cli_parser.add_argument('-i', '--init',
+                            help='create example ini files',
+                            action='store_true')
 
-    ver = '3.4.5.99#dev-7'
-    try_parse(ver)
+    args = cli_parser.parse_args()
+    print(args)
 
-    ver = '3.4.5.99 dev-7'
-    try_parse(ver)
+    # load the ini file
+    config.load(args.quiet)
 
-    ver = '3.4.5.99'
-    try_parse(ver)
-
-
-    ver = "version = '3.4.5.99.rc.7'"
-    try_parse(ver)
-
-    ver = "version = v3.4.5.99.rc.7"
-    try_parse(ver)
-
-    ver = 'version: 3.4.5.99.rc.7 and a bunch of other text'
-    try_parse(ver)
-
-    ver = 'version: 3.4.5.99 and a bunch of other text'
-    try_parse(ver)
-
-    ver = 'This document covers version 3.4.5.99 of the code'
-    try_parse(ver)
-
-    ver = "__VERSION__ = '3.4.5.99.rc.7'"
-    try_parse(ver)
-
-
-    x = '3'
-    print(f'{x}, {increment(x)}')
-
-    x = '45'
-    print(f'{x}, {increment(x)}')
-
-    x = 'xyzzy'
-    print(f'{x}, {increment(x)}')
-
-    print('************************************************************************')
-
-    write_dev = config.config_data['syntax']['write_dev']
-    write_prod = config.config_data['syntax']['write_prod']
-
-    print(version(write_dev))
-    print(version(write_prod))
-
-    print('************************************************************************')
-
-    try_bump('major')
-    try_bump('minor')
-    try_bump('patch')
-    try_bump('build')
-    try_bump('devtext')
-    try_bump('devnumber')
 
 if __name__ == '__main__':
     main()
