@@ -31,7 +31,8 @@ def load(quiet: bool) -> None:
     # verify_settings()
 
     # print out the contents
-    # show()
+    # if not quiet:
+    #     show()
 
 
 def verify_settings() -> None:

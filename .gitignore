@@ -1,5 +1,4 @@
 # specific files
-example*.*
 
 # directories for this project
 __pycache__/
