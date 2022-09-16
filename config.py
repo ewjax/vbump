@@ -1,7 +1,7 @@
 import configparser
 
 # global instance of the EQValet class
-ini_filename = 'versionbump.ini'
+ini_filename = '.vbump.ini'
 
 
 # global data
@@ -9,12 +9,9 @@ ini_filename = 'versionbump.ini'
 config_data = configparser.ConfigParser()
 
 
-def load(quiet: bool) -> None:
+def load() -> None:
     """
     Utility function to load contents from .ini logfile into a configparser.ConfigParser object
-
-    Args:
-        quiet:
     """
     global config_data
 

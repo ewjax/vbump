@@ -1,4 +1,5 @@
 # specific files
+.vbump.ini
 
 # directories for this project
 __pycache__/

@@ -5,6 +5,10 @@ import argparse
 import config
 
 
+# command line arguments stored here
+args = argparse.Namespace()
+
+
 #
 #
 def increment(value: str) -> str:
@@ -28,14 +32,15 @@ def increment(value: str) -> str:
 #
 def bump(fieldname: str = None) -> dict:
     """
-    Bump operation, to increase indicated fieldname by 1, and reset all lower fields (as indicated in reset_order) to 0
-        - 'auto' fields are also incremented by 1
+    Bump operation, to
+        - 'auto' fields are incremented by 1
+        - increase indicated fieldname by 1, and reset all lower fields (as defined in reset_order) to 0
 
     Args:
         fieldname: fieldname to be incremented, or 'None' to only increment 'auto' fields
 
     Returns:
-        updated dictionary of version fields and values
+        updated dictionary of {key:val} where keys = fieldnames, val = field value
 
     """
     reset_order = config.config_data['bump']['reset_order']
@@ -43,8 +48,7 @@ def bump(fieldname: str = None) -> dict:
 
     current_version_dict = config.config_data['current_version']
 
-    # make a manual copy, since although the config.config representation as a dictionary works,
-    # you can't print and debug with it
+    # make a copy for modification
     new_version_dict = {}
     for key in current_version_dict.keys():
         new_version_dict[key] = current_version_dict[key]
@@ -91,7 +95,7 @@ def version(write_pattern: str, version_dict: dict) -> str:
     """
     create version string, using the f-string pattern in write_pattern, and field values are from the version_dict
 
-    TODO note that a target present in the write_pattern, but not in the list of fields in version_dict,
+    TODO note that a field present in the write_pattern, but not in the list of fields in version_dict,
     will cause an exception which we don't catch, because there is no graceful recovery
 
     Args:
@@ -108,25 +112,53 @@ def version(write_pattern: str, version_dict: dict) -> str:
     return rv
 
 
+#
+#
+def write(new_version_dict):
+
+    # get current version info from config file
+    current_version_dict = config.config_data['current_version']
+
+    # save any modified info back to the ini file
+    modified = False
+    for fieldname in current_version_dict.keys():
+        new_val = new_version_dict[fieldname]
+        current_val = current_version_dict[fieldname]
+        if new_val != current_val:
+            config.config_data['current_version'][fieldname] = new_val
+            modified = True
+
+    # if anything is not matching between current and new, and dryrun isn't set, then save the info back to ini file
+    if modified and args.dryrun is False:
+        config.save()
+        if not args.quiet:
+            print(f'Updated version info saved to ini file [{config.ini_filename}]')
+
+    # if not dryrun, then write the new version to all write output files
+
+
+#
+#
 def main():
 
     # *********************************************************************************************************
     # parse the command line
-    cli_parser = argparse.ArgumentParser()
+    cli_parser = argparse.ArgumentParser(description=f'Command line tool to automate version bumping. '
+                                                     f'Current version maintained in [{config.ini_filename}]')
 
     # bump commands
     cli_parser.add_argument('-b', '--bump',
-                            help='bump the indicated field [default = auto field(s)]',
+                            help='bump the indicated field [default = auto field(s)], and then perform a --write operation',
                             nargs='?', type=str, const='auto')
 
     # report current version
     cli_parser.add_argument('-v', '--version',
-                            help='report current version string from .ini file to stdout [default format = dev]',
+                            help=f"return current version string in either 'dev' [default] or 'prod' format (development/production)",
                             nargs='?', type=str, const='dev', choices=['dev', 'prod'])
 
     # write current version to output files
     cli_parser.add_argument('-w', '--write',
-                            help='write current version string to output files [default format = dev]',
+                            help=f"write current version string [default 'dev' format] to output/write files specified in [{config.ini_filename}]",
                             nargs='?', type=str, const='dev', choices=['dev', 'prod'])
 
     # dry run?
@@ -139,13 +171,21 @@ def main():
                             help='flag: perform all actions with no screen reports',
                             action='store_true')
 
+    global args
     args = cli_parser.parse_args()
+    # todo - delete this line
     print(args)
 
     # *********************************************************************************************************
 
     # load the ini file
-    config.load(args.quiet)
+    config.load()
+
+    # make a copy of the version info dictionary
+    new_version_dict = {}
+    current_version_dict = config.config_data['current_version']
+    for key in current_version_dict.keys():
+        new_version_dict[key] = current_version_dict[key]
 
     # *********************************************************************************************************
 
@@ -154,7 +194,6 @@ def main():
 
         # it is a bit amazing that this works.  Handy that format() is written to properly deal with **kwargs, which as it happens,
         # the dictionary representation of the config.config objects are in exactly the right format to support
-        current_version_dict = config.config_data['current_version']
         write_dev = config.config_data['syntax']['write_dev']
         write_prod = config.config_data['syntax']['write_prod']
 
@@ -168,7 +207,7 @@ def main():
     # process bump command
     if args.bump:
 
-        current_version_dict = config.config_data['current_version']
+        # current_version_dict = config.config_data['current_version']
         write_dev = config.config_data['syntax']['write_dev']
 
         # determine which fieldname to bump
@@ -183,11 +222,16 @@ def main():
         # do the bump and report what new version will be
         new_version_dict = bump(fieldname)
         if not args.quiet:
-            print(f'Current version (dev format):   {version(write_dev, current_version_dict)}')
-            print(f'New version (dev format):       {version(write_dev, new_version_dict)}')
+            print(f'Current version (dev format): {version(write_dev, current_version_dict)}')
+            print(f'New version     (dev format): {version(write_dev, new_version_dict)}')
 
-    # do a write?  or wait until user answers Y/N?
-    # now what
+        # now do a write
+        write(new_version_dict)
+
+    # process write command
+    if args.write:
+        write(new_version_dict)
+
 
 if __name__ == '__main__':
     main()
