@@ -12,8 +12,16 @@ Concepts:
     - Development version fields, such as devtext and devnumber
     - Control of reset logic, i.e. when lower-level fields should 'reset' to 0 when the higher-level fields are bumped
     - Support for fields which do not reset, but continue to increment (a 'build number' field)
-  - Bump operation: reads from, and writes to, the [current_version] section of the .vbump.ini file
-    - asdf
+  - Current Version operation:
+    - Reads version from [current_version] section of [.vbump.ini]
+    - Returns string form, in either 'dev' or 'prod' versions
+    - Syntax for 'dev' and 'prod' versions as indicated by [syntax] section of [.vbump.ini]
+      - Dev example: {major}.{minor}.{patch}.{build}{devtext}{devnumber}
+      - Prod example: {major}.{minor}.{patch}.{build}
+  - Bump operation: 
+    - reads from, and writes to, the [current_version] section of the .vbump.ini file
+    - If no field is specified, will automatically bump 'auto' fields listed in [bump] section of [.vbump.ini]
+    - 
   - Write operation: reads version info from the [current_version] section of the .vbump.ini file, and writes to 
 
 usage: vbump.exe [-h] [-c [{dev,prod}]] [-b [BUMP]] [-w [{dev,prod}]] [-d]
