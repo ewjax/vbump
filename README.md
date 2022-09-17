@@ -14,8 +14,8 @@ Concepts:
     - devnumber = 27
   
   - The string form of the version info can be represented in two formats
-    - development or 'dev', example '3.4.5.119-dev.27'
-    - production or 'prod', example '3.4.5.119'
+    - development or 'dev', examples '3.4.5.119-dev.27', '3.4.5-rc27', etc
+    - production or 'prod', example '3.4.5.119', '3.4.5', etc
   - The version information saved is very configurable.  Nothing is hard-coded, but examples are included with typical setups.
     - Typical semvar (major, minor, patch) fields
     - Development version fields, such as devtext and devnumber
