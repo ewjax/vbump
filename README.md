@@ -5,8 +5,8 @@ Inspired by bumpversion, tbump, and others, this version bumping utility does si
 Concepts:
   - The "master" version information is maintained the [current_version] section of the .vbump.ini file
   - The string form of the version info can be represented in two formats
-  -   a) development or 'dev'
-  -   b) production or 'prod'
+    -   a) development or 'dev'
+    -   b) production or 'prod'
   - The version information saved is very configurable.  Nothing is hard-coded, but examples are included with typical setups.
   -   a) Typical semvar (major, minor, patch) fields
   -   b) Development version fields, such as devtext and devnumber
