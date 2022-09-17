@@ -1,3 +1,5 @@
 
 # version number
-__VERSION__ = '3.4.5.99-dev.7'
+# before
+__VERSION__ = '1.2.3.4-dev.5'
+# after
