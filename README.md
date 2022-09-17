@@ -22,7 +22,7 @@ Concepts:
     - Control of reset logic, i.e. when lower-level fields should 'reset' to 0 when the higher-level fields are bumped
     - Support for fields which do not reset, but continue to increment (a 'build number' field)
   
-  - Current Version operation:
+  - --current-version operation:
     - Reads version from [current_version] section of [.vbump.ini]
     - Returns string form, in either 'dev' or 'prod' versions
     - Syntax for 'dev' and 'prod' versions as indicated by [syntax] section of [.vbump.ini]
@@ -45,6 +45,8 @@ Concepts:
     - writes to the output files indicated in the [write] section of [.vbump.ini]
       - scans each line of each file for version strings, using the 'read_regex' regular expression from the [syntax] section of [.vbump.ini]
       - if a version string is found, replaces that version string, in either 'dev' or 'prod' formats, with the new version info
+
+  - 
 
 usage: vbump.exe [-h] [-c [{dev,prod}]] [-b [BUMP]] [-w [{dev,prod}]] [-d]
                  [-q] [-i]
