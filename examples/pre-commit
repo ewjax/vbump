@@ -1,0 +1,4 @@
+#!/bin/sh 
+# this file is [<project root>/.git/hooks/precommit]
+./pre-commit.bat
+
