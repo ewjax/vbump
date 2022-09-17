@@ -299,11 +299,6 @@ def main():
     # *********************************************************************************************************
 
     # process init command and exit
-    if args.init:
-        if not args.quiet:
-            util.print_example_files()
-
-    # process init command and exit
     # do this before the check on configloaded, so even if the config file wasn't loaded, the user still
     # has the chance to issue the --init command to create the ini file
     if args.init:
@@ -311,15 +306,15 @@ def main():
             util.print_example_files()
         sys.exit(0)
 
-    # was there a problem loading the ini file?  if so, bail out
-    if not configloaded:
-        sys.exit(0)
-
     # process vbump version command
     if args.vbump_version:
         if not args.quiet:
             print(f'{_version.__VERSION__}')
             sys.exit(0)
+
+    # was there a problem loading the ini file?  if so, bail out
+    if not configloaded:
+        sys.exit(0)
 
     # make a copy of the version info dictionary
     new_version_dict = {}
