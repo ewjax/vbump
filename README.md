@@ -5,14 +5,15 @@ Inspired by bumpversion, tbump, and others, this version bumping utility does si
 Concepts:
   - The "master" version information is maintained the [current_version] section of the .vbump.ini file
   - The string form of the version info can be represented in two formats
-    -   a) development or 'dev'
-    -   b) production or 'prod'
+    - development or 'dev'
+    - production or 'prod'
   - The version information saved is very configurable.  Nothing is hard-coded, but examples are included with typical setups.
-  -   a) Typical semvar (major, minor, patch) fields
-  -   b) Development version fields, such as devtext and devnumber
-  -   c) Control of reset logic, i.e. when lower-level fields should 'reset' to 0 when the higher-level fields are bumped
-  -   d) Support for fields which do not reset, but continue to increment (a 'build number' field)
+    - Typical semvar (major, minor, patch) fields
+    - Development version fields, such as devtext and devnumber
+    - Control of reset logic, i.e. when lower-level fields should 'reset' to 0 when the higher-level fields are bumped
+    - Support for fields which do not reset, but continue to increment (a 'build number' field)
   - Bump operation: reads from, and writes to, the [current_version] section of the .vbump.ini file
+    - asdf
   - Write operation: reads version info from the [current_version] section of the .vbump.ini file, and writes to 
 
 usage: vbump.exe [-h] [-c [{dev,prod}]] [-b [BUMP]] [-w [{dev,prod}]] [-d]
