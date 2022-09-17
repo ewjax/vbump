@@ -1,4 +1,3 @@
-
 import configparser
 
 import util
@@ -12,20 +11,25 @@ ini_filename = '.vbump.ini'
 config_data = configparser.ConfigParser()
 
 
-def load() -> None:
+def load() -> bool:
     """
     Utility function to load contents from .ini logfile into a configparser.ConfigParser object
+
+    Returns:
+        bool: Indicates success/failure loading the config file
     """
     global config_data
 
+    rv = True
     file_list = config_data.read(ini_filename)
     try:
         if len(file_list) == 0:
+            rv = False
             raise ValueError(f'Unable to open ini logfile [{ini_filename}]')
     except ValueError as verr:
-        print(f'{str(verr)}, need to create {ini_filename} from sample below"')
-        util.print_example_files()
-        exit(-1)
+        print(f'{str(verr)}, need to create it using the --init command line option')
+
+    return rv
 
 
 def save() -> None:

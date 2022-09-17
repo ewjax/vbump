@@ -1,5 +1,5 @@
 
-PACKAGE=versionbump
+PACKAGE=vbump
 
 ##############################################################################
 # do this while not in venv
@@ -30,10 +30,12 @@ libs.clean:
 
 # exe make targets ###########################
 exe: libs
+	pyinstaller --onefile $(PACKAGE).py
 
 exe.clean: libs.clean
-
-
+	rm -rfd build
+	#rm -rfd dist
+	rm dist/$(PACKAGE).exe
 
 
 # general make targets ###########################

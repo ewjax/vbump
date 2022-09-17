@@ -1,3 +1,4 @@
+import sys
 import re
 import argparse
 
@@ -133,25 +134,24 @@ def write():
             with open(filename, 'r') as f:
                 line_list = f.readlines()
 
-            # todo delete this line
-            print(line_list)
-
             # walk the list of lines, looking for version strings
             lines_modified = 0
             for ndx, line in enumerate(line_list):
 
                 # parse each line for the presence of a version string
                 newline = parse(line)
-                if newline:
+                if newline and newline != line:
                     # replace the original line in the list with the new one
                     line_list.pop(ndx)
                     line_list.insert(ndx, newline)
 
+                    # print summary
+                    if not args.quiet:
+                        print(f'Current version line: {line}', end='')
+                        print(f'New version line    : {newline}', end='')
+
                     # increment the lines modified counter
                     lines_modified += 1
-
-            # todo delete this line
-            print(line_list)
 
             # show how many lines were modified
             if not args.quiet:
@@ -159,31 +159,29 @@ def write():
 
             # if not dryrun, write out results
             # todo save prev files as .bak versions??
-
+            if not args.dry_run:
+                with open(filename, 'w') as f:
+                    f.writelines(line_list)
+                print(f'File saved: [{filename}]')
 
         except FileNotFoundError as fnf:
             if not args.quiet:
                 print(fnf)
 
-        # rename filename to filename.bak
-        #
-        # lines_modified=0
-        # read each line from filename.bak
-        #   if contains version regex
-        #       update line with new version, in either dev or prod format
-        #       write updated line to filename
-        #       increment lines_modified
-        #   else
-        #       write original line to filename
-        #
-        # if successful, then delete filename.bak
-        # print status
-
 
 #
 #
-def parse(line):
+def parse(line: str) -> None or str:
+    """
+    Parse a given line of text for the presence of a version string, as defined by
+    'read_regex' in the configuration ini file
 
+    Args:
+        line: line of text to be parsed
+
+    Returns:
+        None if no version string is found, or modified line with new version string
+    """
     # set up the read pattern
     regex = config.config_data['syntax']['read_regex']
     pre_regex = '(?P<pre>.*)'
@@ -219,9 +217,6 @@ def parse(line):
 
         # use the **kwargs format to smerge together the f-string write pattern with the dictionary of field values
         newline = full_pattern.format(**version_dict)
-        # print(f'Original:   {line}')
-        # print(f'Revised:    {newline}')
-        # print(newline)
 
         # update the return value
         rv = newline + '\n'
@@ -237,8 +232,9 @@ def main():
     # *********************************************************************************************************
     # parse the command line
     cli_parser = argparse.ArgumentParser(description=f'Command line tool to automate version bumping. '
-                                                     f'Current version maintained in [{config.ini_filename}]')
-
+                                                     f"No command line options is equivalent to '--bump' and '--write'. "
+                                                     f'Master version maintained in [{config.ini_filename}]. '
+                                         )
     # report current version
     cli_parser.add_argument('-c', '--current-version',
                             help=f"return current version string in 'dev' [default] or 'prod' format (development/production)",
@@ -278,13 +274,7 @@ def main():
     # *********************************************************************************************************
 
     # load the ini file
-    config.load()
-
-    # make a copy of the version info dictionary
-    new_version_dict = {}
-    current_version_dict = config.config_data['current_version']
-    for key in current_version_dict.keys():
-        new_version_dict[key] = current_version_dict[key]
+    configloaded = config.load()
 
     # *********************************************************************************************************
 
@@ -292,7 +282,21 @@ def main():
     if args.init:
         if not args.quiet:
             util.print_example_files()
-        exit(0)
+        sys.exit(0)
+
+    if not configloaded:
+        sys.exit(0)
+
+    # make a copy of the version info dictionary
+    new_version_dict = {}
+    current_version_dict = config.config_data['current_version']
+    for key in current_version_dict.keys():
+        new_version_dict[key] = current_version_dict[key]
+
+    # no command given on command line? interpret this as --bump and --write
+    bumpwrite = False
+    if args.current_version is None and args.bump is None and args.write is None:
+        bumpwrite = True
 
     # process version command
     if args.current_version:
@@ -310,17 +314,17 @@ def main():
                 print(f'Current version (prod format):  {version(write_prod, current_version_dict)}')
 
     # process bump command
-    if args.bump:
+    if args.bump or bumpwrite:
 
         # current_version_dict = config.config_data['current_version']
         write_dev = config.config_data['syntax']['write_dev']
 
         # determine which fieldname to bump
-        fieldname = None
-        if args.bump in current_version_dict.keys():
+        if args.bump and args.bump in current_version_dict.keys():
             fieldname = args.bump
         else:
-            if args.bump != 'auto' and not args.quiet:
+            fieldname = None
+            if args.bump and args.bump != 'auto' and not args.quiet:
                 print(f"    ['{args.bump}'] unrecognized field name")
                 print(f'    Valid field names: {list(current_version_dict.keys())}')
 
@@ -346,7 +350,7 @@ def main():
                     print(f'Updated version info saved to ini file [{config.ini_filename}]')
 
     # process write command
-    if args.write:
+    if args.write or bumpwrite:
         write()
 
 
