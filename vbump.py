@@ -5,6 +5,7 @@ import textwrap
 
 import config
 import util
+import _version
 
 # command line arguments stored here
 args = argparse.Namespace()
@@ -232,7 +233,7 @@ def main():
 
     # *********************************************************************************************************
     # parse the command line
-    formatter = lambda prog: argparse.RawTextHelpFormatter(prog, max_help_position=52)
+    def formatter(prog): return argparse.RawTextHelpFormatter(prog, max_help_position=52)
     cli_parser = argparse.ArgumentParser(
                                          # formatter_class=argparse.RawTextHelpFormatter,
                                          formatter_class=formatter,
@@ -246,8 +247,7 @@ def main():
     cli_parser.add_argument('-c', '--current-version',
                             help="Return current version string in 'dev' (default) or 'prod' format\n"
                                  f"Reads version info from [current_version] section of [{config.ini_filename}]\n"
-                                 f"String formatted as indicated in [syntax] section of [{config.ini_filename}]\n"
-                            ,
+                                 f"String formatted as indicated in [syntax] section of [{config.ini_filename}]\n",
                             nargs='?', type=str, const='dev', choices=['dev', 'prod'])
 
     # bump commands
@@ -279,11 +279,17 @@ def main():
                             help='flag: Print sample config files to screen (stdout)',
                             action='store_true')
 
+    # version of vbump
+    cli_parser.add_argument('-v', '--vbump-version',
+                            help='flag: Print version of vbump and exit',
+                            action='store_true')
+
     # parse the command line
     global args
     args = cli_parser.parse_args()
-    if not args.quiet:
-        print(args)
+    # todo - add a verbose option and include this in output?  very useful for debugging
+    # if not args.quiet:
+    #     print(args)
 
     # *********************************************************************************************************
 
@@ -296,10 +302,24 @@ def main():
     if args.init:
         if not args.quiet:
             util.print_example_files()
+
+    # process init command and exit
+    # do this before the check on configloaded, so even if the config file wasn't loaded, the user still
+    # has the chance to issue the --init command to create the ini file
+    if args.init:
+        if not args.quiet:
+            util.print_example_files()
         sys.exit(0)
 
+    # was there a problem loading the ini file?  if so, bail out
     if not configloaded:
         sys.exit(0)
+
+    # process vbump version command
+    if args.vbump_version:
+        if not args.quiet:
+            print(f'{_version.__VERSION__}')
+            sys.exit(0)
 
     # make a copy of the version info dictionary
     new_version_dict = {}

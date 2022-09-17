@@ -63,4 +63,7 @@ Concepts:
     - Includes content for sample .vbump.ini files, _version.py files, and some script/batch files for incorporation into git workflow
     - The sample git automatioin scripts assume the user wishes to auto-bump at every commit
     
-  
+  - Flag: --vbump-version
+    - If set, will print version of vbump and exit
+
+

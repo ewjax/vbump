@@ -36,6 +36,7 @@ exe.clean: libs.clean
 	rm -rfd build
 	#rm -rfd dist
 	rm dist/$(PACKAGE).exe
+	rm $(PACKAGE).spec
 
 
 # general make targets ###########################

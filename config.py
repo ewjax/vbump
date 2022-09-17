@@ -1,7 +1,5 @@
 import configparser
 
-import util
-
 # global instance of the EQValet class
 ini_filename = '.vbump.ini'
 
