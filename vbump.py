@@ -1,6 +1,7 @@
 import sys
 import re
 import argparse
+import textwrap
 
 import config
 import util
@@ -231,38 +232,51 @@ def main():
 
     # *********************************************************************************************************
     # parse the command line
-    cli_parser = argparse.ArgumentParser(description=f'Command line tool to automate version bumping. '
-                                                     f"No command line options is equivalent to '--bump' and '--write'. "
-                                                     f'Master version maintained in [{config.ini_filename}]. '
-                                         )
+    formatter = lambda prog: argparse.RawTextHelpFormatter(prog, max_help_position=52)
+    cli_parser = argparse.ArgumentParser(
+                                         # formatter_class=argparse.RawTextHelpFormatter,
+                                         formatter_class=formatter,
+                                         # formatter_class=argparse.RawDescriptionHelpFormatter,
+                                         description=textwrap.dedent(f'''
+                                            Command line tool to automate version bumping.
+                                                - No command line options is equivalent to '--bump' and '--write'
+                                                - Master version maintained in [{config.ini_filename}]
+                                            '''))
     # report current version
     cli_parser.add_argument('-c', '--current-version',
-                            help=f"return current version string in 'dev' [default] or 'prod' format (development/production)",
+                            help="Return current version string in 'dev' (default) or 'prod' format\n"
+                                 f"Reads version info from [current_version] section of [{config.ini_filename}]\n"
+                                 f"String formatted as indicated in [syntax] section of [{config.ini_filename}]\n"
+                            ,
                             nargs='?', type=str, const='dev', choices=['dev', 'prod'])
 
     # bump commands
     cli_parser.add_argument('-b', '--bump',
-                            help=f'bump the indicated field [default = auto field(s)].  Reads and writes only [{config.ini_filename}]',
+                            help=f"Bump the indicated field\n"
+                                 f"Default = 'auto' fields in [bump] section of [{config.ini_filename}]\n"
+                                 f"Reads from, and writes to [current_version] section of [{config.ini_filename}]",
                             nargs='?', type=str, const='auto')
 
     # write current version to output files
     cli_parser.add_argument('-w', '--write',
-                            help=f"Reads version from [{config.ini_filename}], writes in 'dev' [default] or 'prod' format to [write] output files",
+                            help=f"Writes version string in 'dev' (default) or 'prod' format into the output file(s)\n"
+                                 f"Reads version info from [current_version] section of [{config.ini_filename}]\n"
+                                 f"Writes to output files as specified in the [write] section of [{config.ini_filename}]",
                             nargs='?', type=str, const='dev', choices=['dev', 'prod'])
 
     # dry run?
     cli_parser.add_argument('-d', '--dry-run',
-                            help='flag: report what actions will be taken, but do not actually take them',
+                            help='flag: Report what actions will be taken, but do not actually take them',
                             action='store_true')
 
     # quiet
     cli_parser.add_argument('-q', '--quiet',
-                            help='flag: perform all actions with no screen reports',
+                            help='flag: Perform all actions with no screen reports',
                             action='store_true')
 
     # init
     cli_parser.add_argument('-i', '--init',
-                            help='flag: print sample config files to screen (stdout), suitable for subsequent redirection and editing',
+                            help='flag: Print sample config files to screen (stdout)',
                             action='store_true')
 
     # parse the command line
