@@ -22,16 +22,16 @@ Concepts:
     - Control of reset logic, i.e. when lower-level fields should 'reset' to 0 when the higher-level fields are bumped
     - Support for fields which do not reset, but continue to increment (a 'build number' field)
   
-  - --current-version operation:
+  - Command: --current-version [{dev,prod}] (default: dev)
     - Reads version from [current_version] section of [.vbump.ini]
-    - Returns string form, in either 'dev' or 'prod' versions
+    - Returns string form, in either 'dev' or 'prod' versions (default: 'dev')
     - Syntax for 'dev' and 'prod' versions as indicated by [syntax] section of [.vbump.ini]
     - Example [syntax] section:
       - [syntax]
       - write_dev = {major}.{minor}.{patch}.{build}{devtext}{devnumber}
       - write_prod = {major}.{minor}.{patch}.{build}
   
-  - Bump operation: 
+  - Command: --bump [field] (default = as indicated in 'auto')
     - reads version info from, and writes to, the [current_version] section of the .vbump.ini file
     - Fields are reset in the order listed in 'reset_order' fields in [bump] section of [.vbump.ini]
     - If no field is specified, will automatically bump 'auto' fields listed in [bump] section of [.vbump.ini]
@@ -40,14 +40,27 @@ Concepts:
       - reset_order = major, minor, patch, devnumber
       - auto = build, devnumber
   
-  - Write operation: 
+  - Command: --write [{dev,prod}] (default: dev)
     - reads version info from the [current_version] section of [.vbump.ini]
     - writes to the output files indicated in the [write] section of [.vbump.ini]
       - scans each line of each file for version strings, using the 'read_regex' regular expression from the [syntax] section of [.vbump.ini]
       - if a version string is found, replaces that version string, in either 'dev' or 'prod' formats, with the new version info
+    - Example sections:
+      - [syntax]
+      - read_regex = (?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)\.(?P<build>\d+)((?P<devtext>[^0-9]+)(?P<devnumber>\d+))?
+      - [write]
+      - files = _version.py, other_files_here.txt
 
-  - 
+  - Flag: --dry-fun
+    - If set, will report what actions will be taken, but will not actually take them
 
-usage: vbump.exe [-h] [-c [{dev,prod}]] [-b [BUMP]] [-w [{dev,prod}]] [-d]
-                 [-q] [-i]
+  - Flag: --quiet
+    - If set, will take all actions without sending reports to the screen
 
+  - Flag: --init
+    - Useful to create initial versions if .vbump.ini and _version.py
+    - Echoes the files to screen (stdout), the user should redirect and edit as needed
+    - Includes content for sample .vbump.ini files, _version.py files, and some script/batch files for incorporation into git workflow
+    - The sample git automatioin scripts assume the user wishes to auto-bump at every commit
+    
+  
