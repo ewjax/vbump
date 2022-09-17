@@ -20,8 +20,12 @@ Concepts:
       - Prod example: {major}.{minor}.{patch}.{build}
   - Bump operation: 
     - reads from, and writes to, the [current_version] section of the .vbump.ini file
+    - Fields are reset in the order listed in 'reset_order' fields in [bump] section of [.vbump.ini]
     - If no field is specified, will automatically bump 'auto' fields listed in [bump] section of [.vbump.ini]
-    - 
+    - Example [bump] section:
+      [bump]
+      reset_order = major, minor, patch, devnumber
+      auto = build, devnumber
   - Write operation: reads version info from the [current_version] section of the .vbump.ini file, and writes to 
 
 usage: vbump.exe [-h] [-c [{dev,prod}]] [-b [BUMP]] [-w [{dev,prod}]] [-d]
