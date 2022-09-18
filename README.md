@@ -1,6 +1,11 @@
 # vbump
 
-Inspired by bumpversion, tbump, and others, this version bumping utility does similar things to the others but does not also automate the git workflow steps.
+Inspired by bumpversion, tbump, and others, this version bumping utility improves on those by 
+	a) very configurable, but also very easy to use to automate the version bumping process
+	b) handles both 'development' and 'production' version numbers
+	c) supports the typical semvar system, i.e. major.minor.patch versioning
+	d) supports the concept of fields which do not reset when others do, allowing for a 'build' field that continually increments
+	e) doesn't tangle itself up with the git workflow steps
 
 Concepts:
   - The "master" version information is maintained the [current_version] section of [.vbump.ini]
