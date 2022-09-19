@@ -7,6 +7,8 @@ Inspired by bumpversion, tbump, and others, this version bumping utility improve
 	d) supports the concept of fields which do not reset when others do, allowing for a 'build' field that continually increments
 	e) doesn't tangle itself up with the git workflow steps
 
+usage: vbump [-h] [-c [{dev,prod}]] [-b [BUMP]] [-w [{dev,prod}]] [-d] [-q] [-i] [-v]
+
 Concepts:
   - The "master" version information is maintained the [current_version] section of [.vbump.ini]
   - Example [current_version] section:
@@ -27,7 +29,7 @@ Concepts:
     - Control of reset logic, i.e. when lower-level fields should 'reset' to 0 when the higher-level fields are bumped
     - Support for fields which do not reset, but continue to increment (a 'build number' field)
   
-  - Command: --current-version [{dev,prod}] (default: dev)
+  - Command line option: --current-version [{dev,prod}] (default: dev)
     - Reads version from [current_version] section of [.vbump.ini]
     - Returns string form, in either 'dev' or 'prod' versions (default: 'dev')
     - Syntax for 'dev' and 'prod' versions as indicated by [syntax] section of [.vbump.ini]
@@ -36,7 +38,7 @@ Concepts:
       - write_dev = {major}.{minor}.{patch}.{build}{devtext}{devnumber}
       - write_prod = {major}.{minor}.{patch}.{build}
   
-  - Command: --bump [field] (default = as indicated in 'auto')
+  - Command line option: --bump [field] (default = as indicated in 'auto')
     - reads version info from, and writes to, the [current_version] section of the .vbump.ini file
     - Fields are reset in the order listed in 'reset_order' fields in [bump] section of [.vbump.ini]
     - If no field is specified, will automatically bump 'auto' fields listed in [bump] section of [.vbump.ini]
@@ -45,7 +47,7 @@ Concepts:
       - reset_order = major, minor, patch, devnumber
       - auto = build, devnumber
   
-  - Command: --write [{dev,prod}] (default: dev)
+  - Command line option: --write [{dev,prod}] (default: dev)
     - reads version info from the [current_version] section of [.vbump.ini]
     - writes to the output files indicated in the [write] section of [.vbump.ini]
       - scans each line of each file for version strings, using the 'read_regex' regular expression from the [syntax] section of [.vbump.ini]
@@ -56,19 +58,19 @@ Concepts:
       - [write]
       - files = _version.py, other_files_here.txt
 
-  - Flag: --dry-fun
+  - Command line option: --dry-fun
     - If set, will report what actions will be taken, but will not actually take them
 
-  - Flag: --quiet
+  - Command line option: --quiet
     - If set, will take all actions without sending reports to the screen
 
-  - Flag: --init
+  - Command line option: --init
     - Useful to create initial versions if .vbump.ini and _version.py
     - Echoes the files to screen (stdout), the user should redirect and edit as needed
     - Includes content for sample .vbump.ini files, _version.py files, and some script/batch files for incorporation into git workflow
     - The sample git automatioin scripts assume the user wishes to auto-bump at every commit
     
-  - Flag: --vbump-version
+  - Command line option: --vbump-version
     - If set, will print version of vbump and exit
 
 
