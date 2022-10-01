@@ -58,7 +58,7 @@ Concepts:
       - [write]
       - files = _version.py, other_files_here.txt
 
-  - Command line option: --dry-fun
+  - Command line option: --dry-run
     - If set, will report what actions will be taken, but will not actually take them
 
   - Command line option: --quiet
