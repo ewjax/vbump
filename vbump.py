@@ -4,6 +4,7 @@ import argparse
 import textwrap
 
 import config
+from util import starprint
 import util
 import _version
 
@@ -120,16 +121,17 @@ def version(write_pattern: str, version_dict: dict) -> str:
 def write():
 
     if not args.quiet:
-        print(f'Updating output files, format [{args.write}]')
+        starprint(f'Writing output files, format [{args.write}]', fill='=', alignment='^')
 
     # get the list of output filenames from the ini file
     write_files = config.config_data['write']['files']
     write_file_list = write_files.split(', ')
 
     # walk the list of files
+    files_modified = 0
     for filename in write_file_list:
         if not args.quiet:
-            print(f'-----------------Processing file: [{filename}]--------------------')
+            starprint(f'Writing output file: [{filename}]', fill='-', alignment='^')
 
         try:
             # read entire contents of file into a list
@@ -149,26 +151,31 @@ def write():
 
                     # print summary
                     if not args.quiet:
-                        print(f'Current version line: {line}', end='')
-                        print(f'New version line    : {newline}', end='')
+                        # starprint(f'Current version line: {line}', end='')
+                        # starprint(f'New version line    : {newline}', end='')
+                        starprint(f'Current version line: {line}')
+                        starprint(f'New version line    : {newline}')
 
                     # increment the lines modified counter
                     lines_modified += 1
 
             # show how many lines were modified
             if not args.quiet:
-                print(f'Lines modified: {lines_modified}')
+                starprint(f'Lines to be modified: {lines_modified}')
 
             # if not dryrun, write out results
             # todo save prev files as .bak versions??
             if not args.dry_run:
                 with open(filename, 'w') as f:
                     f.writelines(line_list)
-                print(f'File saved: [{filename}]')
+                starprint(f'File saved: [{filename}]')
+                files_modified += 1
 
         except FileNotFoundError as fnf:
             if not args.quiet:
                 print(fnf)
+
+    starprint(f'Output files modified: {files_modified}', fill='-', alignment='^')
 
 
 #
@@ -347,6 +354,9 @@ def main():
     # process bump command
     if args.bump or bumpwrite:
 
+        if not args.quiet:
+            starprint(f'Bumping version info from [{config.ini_filename}]', fill='=', alignment='^')
+
         # current_version_dict = config.config_data['current_version']
         write_dev = config.config_data['syntax']['write_dev']
 
@@ -362,12 +372,12 @@ def main():
         # do the bump and report what new version will be
         new_version_dict = bump(fieldname)
         if not args.quiet:
-            print(f'Current version (dev format): {version(write_dev, current_version_dict)}')
-            print(f'New version     (dev format): {version(write_dev, new_version_dict)}')
+            starprint(f'Current version (dev format): {version(write_dev, current_version_dict)}')
+            starprint(f'New version     (dev format): {version(write_dev, new_version_dict)}')
 
         # if any fields have changed, then save them back to the current dictionary, and write it to disk
+        modified = False
         if args.dry_run is False:
-            modified = False
             for fieldname in current_version_dict.keys():
                 new_val = new_version_dict[fieldname]
                 current_val = current_version_dict[fieldname]
@@ -375,10 +385,13 @@ def main():
                     config.config_data['current_version'][fieldname] = new_val
                     modified = True
 
-            if modified:
-                config.save()
-                if not args.quiet:
-                    print(f'Updated version info saved to ini file [{config.ini_filename}]')
+        if modified:
+            config.save()
+            if not args.quiet:
+                starprint(f'Updated version info saved to ini file [{config.ini_filename}]')
+        else:
+            if not args.quiet:
+                starprint(f'File [{config.ini_filename}] unchanged')
 
     # process write command
     if args.write or bumpwrite:
