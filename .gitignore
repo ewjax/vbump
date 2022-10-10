@@ -14,7 +14,7 @@ dist/
 build/
 
 # Environments
-.venv
+.vbump.venv
 
 # PyCharm64 config files
 .idea/

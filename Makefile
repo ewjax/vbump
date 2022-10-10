@@ -4,10 +4,10 @@ PACKAGE=vbump
 ##############################################################################
 # do this while not in venv
 venv:
-	python -m venv .venv
+	python -m venv .$(PACKAGE).venv
 
 venv.clean:
-	rm -rfd .venv
+	rm -rfd .$(PACKAGE).venv
 
 
 
@@ -32,7 +32,7 @@ libs.clean:
 exe: libs
 	pyinstaller --onefile $(PACKAGE).py
 
-exe.clean: libs.clean
+exe.clean:
 	rm -rfd build
 	#rm -rfd dist
 	rm dist/$(PACKAGE).exe

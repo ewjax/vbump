@@ -280,7 +280,7 @@ def main():
                             action='store_true')
 
     # version of vbump
-    cli_parser.add_argument('-v', '--vbump-version',
+    cli_parser.add_argument('-v', '--version',
                             help='flag: Print version of vbump and exit',
                             action='store_true')
 
@@ -307,7 +307,7 @@ def main():
         sys.exit(0)
 
     # process vbump version command
-    if args.vbump_version:
+    if args.version:
         if not args.quiet:
             print(f'{_version.__VERSION__}')
             sys.exit(0)
@@ -337,10 +337,12 @@ def main():
 
         if args.current_version == 'dev':
             if not args.quiet:
-                print(f'Current version (dev format):   {version(write_dev, current_version_dict)}')
+                # print(f'Current version (dev format):   {version(write_dev, current_version_dict)}')
+                print(f'{version(write_dev, current_version_dict)}')
         elif args.current_version == 'prod':
             if not args.quiet:
-                print(f'Current version (prod format):  {version(write_prod, current_version_dict)}')
+                # print(f'Current version (prod format):  {version(write_prod, current_version_dict)}')
+                print(f'{version(write_prod, current_version_dict)}')
 
     # process bump command
     if args.bump or bumpwrite:
