@@ -67,10 +67,9 @@ Concepts:
   - Command line option: --init
     - Useful to create initial versions if .vbump.ini and _version.py
     - Echoes the files to screen (stdout), the user should redirect and edit as needed
-    - Includes content for sample .vbump.ini files, _version.py files, and some script/batch files for incorporation into git workflow
-    - The sample git automatioin scripts assume the user wishes to auto-bump at every commit
-    
-  - Command line option: --vbump-version
-    - If set, will print version of vbump and exit
+    - Includes content for sample .vbump.ini files, _version.py files
+        
+  - Command line option: --version
+    - Print version of vbump to stdout and exit
 
 
