@@ -121,7 +121,11 @@ def version(write_pattern: str, version_dict: dict) -> str:
 def write():
 
     if not args.quiet:
-        starprint(f'Writing output files, format [{args.write}]', fill='=', alignment='^')
+        if args.write:
+            output_format = args.write
+        else:
+            output_format = 'dev'
+        starprint(f'Writing output files, format [{output_format}]', fill='=', alignment='^')
 
     # get the list of output filenames from the ini file
     write_files = config.config_data['write']['files']
@@ -168,7 +172,7 @@ def write():
             if not args.dry_run:
                 with open(filename, 'w') as f:
                     f.writelines(line_list)
-                starprint(f'File saved: [{filename}]')
+                starprint(f'File saved          : {filename}')
                 files_modified += 1
 
         except FileNotFoundError as fnf:
