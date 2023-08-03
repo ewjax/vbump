@@ -9,9 +9,9 @@ Inspired by bumpversion, tbump, and others, this version bumping utility improve
 
 usage: vbump [-h] [-c [{dev,prod}]] [-b [BUMP]] [-w [{dev,prod}]] [-d] [-q] [-i] [-v]
 
-Concepts:
+### Concepts:
   - The "master" version information is maintained the [current_version] section of [.vbump.ini]
-  - Example [current_version] section:
+  - Example [current_version] section, defining the fieldnames (major, minor, patch, etc) and their current values:
     - [current_version]
     - major = 3
     - minor = 4
@@ -32,7 +32,7 @@ Concepts:
   - Command line option: --current-version [{dev,prod}] (default: dev)
     - Reads version from [current_version] section of [.vbump.ini]
     - Returns string form, in either 'dev' or 'prod' versions (default: 'dev')
-    - Syntax for 'dev' and 'prod' versions as indicated by [syntax] section of [.vbump.ini]
+    - Syntax for 'dev' and 'prod' versions as indicated by [syntax] section of [.vbump.ini], showing the arrangement of the fieldnames
     - Example [syntax] section:
       - [syntax]
       - write_dev = {major}.{minor}.{patch}.{build}{devtext}{devnumber}
@@ -73,3 +73,34 @@ Concepts:
     - Print version of vbump to stdout and exit
 
 
+### Build and Installation Steps:
+The vbump utility makes use of a virtual python environment, and creates a standalone executable, which can be copied to a local directory such as /usr/local/bin or similar.
+
+The build process is controlled via a makefile.
+
+Build steps:
+```
+git clone git@github.com:ewjax/vbump.git
+cd vbump
+make venv
+```
+Activate the python virtual environment, then continue the build process:
+```
+(unix): source .vbump.venv/bin/activate
+(windows): .vbump.venv\Scripts\activate
+make all
+Executable will be placed in ./dist subdirectory
+```
+Test the executable, by running it with the 'help' option:
+```
+./dist/vbump -h
+```
+Assuming it shows a list of command line options, indicating it built successfully, copy the vbump (or vbump.exe) executable from the /dist subdirectory to somewhere in your path.
+
+Cleanup steps:
+```
+(while still in the python virtual environment): 
+make clean
+deactivate
+make venv.clean
+```
