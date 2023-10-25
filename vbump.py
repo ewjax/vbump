@@ -300,8 +300,8 @@ def main():
     global args
     args = cli_parser.parse_args()
     # todo - add a verbose option and include this in output?  very useful for debugging
-    # if not args.quiet:
-    #     print(args)
+    if not args.quiet:
+        print(args)
 
     # *********************************************************************************************************
 

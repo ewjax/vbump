@@ -1,6 +1,6 @@
 
 # version number
-This is a test file which contains a version [1.0.8.144-dev.0] string.
-Here is a second occurrence: 1.0.8.144-dev.0
-{1.0.8.144-dev.0} - a third
-1.0.8.144-dev.0
+This is a test file which contains a version [1.0.8.145-dev.1] string.
+Here is a second occurrence: 1.0.8.145-dev.1
+{1.0.8.145-dev.1} - a third
+1.0.8.145-dev.1
