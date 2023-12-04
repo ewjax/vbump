@@ -38,7 +38,7 @@ def bump(fieldname: str = None) -> dict:
     """
     Bump operation, to
         - 'auto' fields are incremented by 1
-        - increase indicated fieldname by 1, and reset all lower fields (as defined in reset_order) to 0
+        - increment indicated fieldname by 1, and reset all lower fields (as defined in reset_order) to 0
 
     Args:
         fieldname: fieldname to be incremented, or 'None' to only increment 'auto' fields
